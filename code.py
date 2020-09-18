@@ -24,36 +24,45 @@ KEYMAP = (
 
 class Matrix:
     def __init__(self, rows=ROWS, cols=COLS):
+        
         self.rows = []
         for pin in rows:
             io = digitalio.DigitalInOut(pin)
-            io.direction = digitalio.Direction.OUTPUT
-            io.drive_mode = digitalio.DriveMode.PUSH_PULL
-            io.value = 0
+            io.direction = digitalio.Direction.INPUT
+            io.pull = digitalio.Pull.DOWN 
             self.rows.append(io)
-        self.cols = []
+            
+        self.cols = []        
         for pin in cols:
             io = digitalio.DigitalInOut(pin)
-            io.direction = digitalio.Direction.INPUT
-            io.pull = digitalio.Pull.DOWN
+            io.direction = digitalio.Direction.OUTPUT
+            io.drive_mode = digitalio.DriveMode.PUSH_PULL
+            io.value = 0         
             self.cols.append(io)
+            
         self.pressed_keys = []
 
     def scan(self):
         new_keys = []
         pressed_keys = []
         released_keys = self.pressed_keys
-        for r in range(len(self.rows)):
-            self.rows[r].value = 1
-            for c in range(len(self.cols)):
-                if self.cols[c].value:
+        #for r in range(len(self.rows)):
+        for c in range(len(self.cols)):
+            #self.rows[r].value = 1
+            self.cols[c].value = 1
+            #for c in range(len(self.cols)):
+            for r in range(len(self.rows)):
+                #if self.cols[c].value:
+                if self.rows[r].value:
                     key = r * len(self.cols) + c
+                    #key = c * len(self.rows) + r
                     pressed_keys.append(key)
                     if key in released_keys:
                         released_keys.remove(key)
                     else:
                         new_keys.append(key)
-            self.rows[r].value = 0
+            #self.rows[r].value = 0
+            self.cols[c].value = 0
         self.pressed_keys = pressed_keys
         return pressed_keys, released_keys, new_keys
 
